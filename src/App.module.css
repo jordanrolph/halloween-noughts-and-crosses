@@ -20,6 +20,10 @@
   background-color: white;
 }
 
+.square[disabled] {
+  color: black;
+}
+
 .square:hover:not([disabled]) {
   cursor: pointer;
   background-color: lightgrey;
