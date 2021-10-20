@@ -7,6 +7,7 @@ const players = {
 };
 const swapPlayer = (currentPlayer) =>
   currentPlayer === players.x.id ? players.o.id : players.x.id;
+const isDraw = (squares) => squares.every((square) => square.value !== null);
 
 const Square = ({ index, value, handleSquareClick }) => {
   return (
@@ -35,6 +36,14 @@ const Board = ({ squares, handleSquareClick }) => {
   );
 };
 
+const AnnounceDraw = () => {
+  return <h1>It's a draw!</h1>;
+};
+
+const RestartButton = ({ handleRestart }) => {
+  return <button onClick={handleRestart}>Restart Game</button>;
+};
+
 const generateEmptyBoard = () => {
   return [...Array(3 * 3)].map((k, i) => ({ index: i, value: null }));
 };
@@ -43,7 +52,14 @@ function App() {
   const [squares, setSquares] = useState(generateEmptyBoard());
   const [currentPlayer, setCurrentPlayer] = useState(players.x.id);
   const [winner, setWinner] = useState(null);
-  const [draw, setDraw] = useState(null);
+  const [draw, setDraw] = useState(false);
+
+  const handleRestart = () => {
+    setCurrentPlayer(players.x.id);
+    setSquares(generateEmptyBoard());
+    setWinner(null);
+    setDraw(null);
+  };
 
   const handleSquareClick = ({ index }) => {
     if (!!squares[index].value) return null;
@@ -54,18 +70,26 @@ function App() {
   };
 
   const findWinner = () => null;
-  const isDraw = () => false;
 
   useEffect(() => {
     const winner = findWinner();
     if (winner) {
       setWinner(winner);
-    } else if (isDraw()) {
+    } else if (isDraw(squares)) {
       setDraw(true);
     } else {
       setCurrentPlayer(swapPlayer(currentPlayer));
     }
   }, [squares]);
+
+  if (draw) {
+    return (
+      <div>
+        <AnnounceDraw />
+        <RestartButton handleRestart={handleRestart} />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.app}>
