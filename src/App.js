@@ -1,11 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./App.module.css";
+
+const players = {
+  x: { symbol: "X", id: "x" },
+  o: { symbol: "O", id: "o" },
+};
+const swapPlayer = (currentPlayer) =>
+  currentPlayer === players.x.id ? players.o.id : players.x.id;
 
 const Square = ({ index, value, handleSquareClick }) => {
   return (
     <button
       className={styles.square}
-      onClick={() => handleSquareClick({ index, value: "X" })}
+      onClick={() => handleSquareClick({ index })}
       disabled={!!value}
     >
       {value}
@@ -34,11 +41,31 @@ const generateEmptyBoard = () => {
 
 function App() {
   const [squares, setSquares] = useState(generateEmptyBoard());
-  const handleSquareClick = ({ index, value }) => {
+  const [currentPlayer, setCurrentPlayer] = useState(players.x.id);
+  const [winner, setWinner] = useState(null);
+  const [draw, setDraw] = useState(null);
+
+  const handleSquareClick = ({ index }) => {
+    if (!!squares[index].value) return null;
+
     const squaresCopy = [...squares];
-    squaresCopy[index] = { index, value };
-    return setSquares(squaresCopy);
+    squaresCopy[index] = { index, value: players[currentPlayer].symbol };
+    setSquares(squaresCopy);
   };
+
+  const findWinner = () => null;
+  const isDraw = () => false;
+
+  useEffect(() => {
+    const winner = findWinner();
+    if (winner) {
+      setWinner(winner);
+    } else if (isDraw()) {
+      setDraw(true);
+    } else {
+      setCurrentPlayer(swapPlayer(currentPlayer));
+    }
+  }, [squares]);
 
   return (
     <div className={styles.app}>
