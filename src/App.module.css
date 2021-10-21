@@ -1,29 +1,5 @@
 .app {
-}
-
-.board {
-  height: min-content;
-  width: min-content;
-  display: grid;
-  gap: 4px;
-  background-color: black;
-}
-
-.square {
-  width: 3em;
-  height: 3em;
+  margin: 1em;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  border: none;
-  background-color: white;
-}
-
-.square[disabled] {
-  color: black;
-}
-
-.square:hover:not([disabled]) {
-  cursor: pointer;
-  background-color: lightgrey;
+  flex-direction: column;
 }

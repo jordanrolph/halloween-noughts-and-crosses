@@ -1,158 +1,9 @@
 import { useState, useEffect } from "react";
-import findWinner from "./utils/findWinner";
+import Game from "./components/Game";
+import { findWinner, isDraw, swapPlayer, generateEmptyBoard } from "./utils";
+import { initialPlayers } from "./constants";
 
 import styles from "./App.module.css";
-
-const minBoardSize = 3;
-const maxBoardSize = 99;
-const maxSecondsPerTurn = 30;
-
-const initialPlayers = {
-  x: { symbol: "X", id: "x", isSetup: false, name: "Player X" },
-  o: { symbol: "O", id: "o", isSetup: false, name: "Player O" },
-};
-const swapPlayer = (currentPlayer) =>
-  currentPlayer === initialPlayers.x.id
-    ? initialPlayers.o.id
-    : initialPlayers.x.id;
-const isDraw = (squares) => {
-  if (!squares?.length) return false;
-  return squares.every((square) => square.value !== null);
-};
-
-const Square = ({ index, value, handleSquareClick }) => {
-  return (
-    <button
-      className={styles.square}
-      onClick={() => handleSquareClick({ index })}
-      disabled={!!value}
-    >
-      {initialPlayers[value]?.symbol}
-    </button>
-  );
-};
-
-const Board = ({ squares, handleSquareClick, boardSize }) => {
-  return (
-    <div
-      className={styles.board}
-      style={{
-        gridTemplate: `repeat(${boardSize}, 1fr) / repeat(${boardSize}, 1fr)`,
-      }}
-    >
-      {squares.map((square) => (
-        <Square
-          key={square.index}
-          index={square.index}
-          value={square.value}
-          handleSquareClick={handleSquareClick}
-        />
-      ))}
-    </div>
-  );
-};
-
-const SetupBoard = ({ setBoardSize }) => {
-  const [n, setN] = useState("");
-
-  const handleSetBoardSize = (e) => {
-    e.preventDefault();
-    setBoardSize(Math.max(Math.min(n, maxBoardSize), minBoardSize));
-  };
-  return (
-    <form onSubmit={handleSetBoardSize}>
-      <label htmlFor="boardSize">How big should the board be?</label>
-      <br />
-      <input
-        id="boardSize"
-        value={n}
-        onChange={(e) => setN(parseInt(e.target.value) || "")}
-        required
-        min={minBoardSize}
-        max={maxBoardSize}
-        type="number"
-        autoFocus
-      />
-      <button type="submit">Next</button>
-      {n && (
-        <p>
-          {n} x {n}
-        </p>
-      )}
-    </form>
-  );
-};
-
-const SetupPlayer = ({ player, handleSetupPlayer }) => {
-  const [name, setName] = useState(player.name);
-
-  return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        handleSetupPlayer({ id: player.id, name });
-      }}
-    >
-      <label htmlFor="name">
-        Player {player.symbol}, what do you want to be called?
-      </label>
-      <input
-        id="name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        required
-        autoFocus
-      />
-      <button type="submit">Next</button>
-    </form>
-  );
-};
-
-const AnnounceWinner = ({ winner }) => {
-  return <h1>{winner} won!</h1>;
-};
-
-const AnnounceDraw = () => {
-  return <h1>It's a draw!</h1>;
-};
-
-const TurnTimer = ({ currentPlayer, setCurrentPlayer }) => {
-  const [seconds, setSeconds] = useState(maxSecondsPerTurn);
-
-  // Update the timer every second.
-  useEffect(() => {
-    const countdown = setInterval(() => {
-      setSeconds((s) => s - 1);
-    }, 1000);
-
-    return () => clearInterval(countdown);
-  }, [setSeconds]);
-
-  // Reset the timer if a player makes their move.
-  useEffect(() => {
-    setSeconds(maxSecondsPerTurn);
-  }, [currentPlayer]);
-
-  // Swap the players if the timer hits zero.
-  useEffect(() => {
-    if (seconds === 0) {
-      setCurrentPlayer((p) => swapPlayer(p));
-      setSeconds(maxSecondsPerTurn);
-    }
-  }, [seconds, setCurrentPlayer]);
-  return <p>You've got {seconds} seconds to make your move</p>;
-};
-
-const RestartButton = ({ handleRestart }) => {
-  return <button onClick={handleRestart}>Restart Game</button>;
-};
-
-const generateEmptyBoard = (boardSize) => {
-  return [...Array(boardSize * boardSize)].map((k, i) => ({
-    index: i,
-    value: null,
-  }));
-};
 
 function App() {
   const [boardSize, setBoardSize] = useState(null);
@@ -171,19 +22,21 @@ function App() {
     setDraw(null);
   };
 
+  // Updates the state with a player chosen name.
+  const handleSetupPlayer = ({ id, name }) => {
+    setPlayers({
+      ...players,
+      [id]: { ...players[id], name, isSetup: true },
+    });
+  };
+
+  // Updates the board's squares state when a player makes a move.
   const handleSquareClick = ({ index }) => {
     if (!!squares[index].value) return null;
 
     const squaresCopy = [...squares];
     squaresCopy[index] = { index, value: players[currentPlayer].id };
     setSquares(squaresCopy);
-  };
-
-  const handleSetupPlayer = ({ id, name }) => {
-    setPlayers({
-      ...players,
-      [id]: { ...players[id], name, isSetup: true },
-    });
   };
 
   // Generate the board once the size is decided.
@@ -203,59 +56,20 @@ function App() {
     }
   }, [squares, boardSize]);
 
-  if (!boardSize) {
-    return <SetupBoard setBoardSize={setBoardSize} />;
-  }
-
-  if (!players.x.isSetup) {
-    return (
-      <SetupPlayer
-        key="x"
-        player={players.x}
-        handleSetupPlayer={handleSetupPlayer}
-      />
-    );
-  }
-
-  if (!players.o.isSetup) {
-    return (
-      <SetupPlayer
-        key="o"
-        player={players.o}
-        handleSetupPlayer={handleSetupPlayer}
-      />
-    );
-  }
-
-  if (winner) {
-    return (
-      <div>
-        <AnnounceWinner winner={players[winner].name} />
-        <RestartButton handleRestart={handleRestart} />
-      </div>
-    );
-  }
-
-  if (draw) {
-    return (
-      <div>
-        <AnnounceDraw />
-        <RestartButton handleRestart={handleRestart} />
-      </div>
-    );
-  }
-
   return (
     <div className={styles.app}>
-      <p>{players[currentPlayer].name}, it's your turn</p>
-      <TurnTimer
+      <Game
+        boardSize={boardSize}
+        setBoardSize={setBoardSize}
+        players={players}
+        handleSetupPlayer={handleSetupPlayer}
+        winner={winner}
+        handleRestart={handleRestart}
         currentPlayer={currentPlayer}
         setCurrentPlayer={setCurrentPlayer}
-      />
-      <Board
+        draw={draw}
         squares={squares}
         handleSquareClick={handleSquareClick}
-        boardSize={boardSize}
       />
     </div>
   );
