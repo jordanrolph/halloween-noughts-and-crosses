@@ -5,6 +5,7 @@ import styles from "./App.module.css";
 
 const minBoardSize = 3;
 const maxBoardSize = 99;
+const maxSecondsPerTurn = 30;
 
 const initialPlayers = {
   x: { symbol: "X", id: "x", isSetup: false, name: "Player X" },
@@ -60,17 +61,24 @@ const SetupBoard = ({ setBoardSize }) => {
   };
   return (
     <form onSubmit={handleSetBoardSize}>
-      <label htmlFor="boardSize">How big do you want to go?</label>
+      <label htmlFor="boardSize">How big should the board be?</label>
+      <br />
       <input
         id="boardSize"
         value={n}
-        onChange={(e) => setN(parseInt(e.target.value))}
+        onChange={(e) => setN(parseInt(e.target.value) || "")}
         required
         min={minBoardSize}
         max={maxBoardSize}
         type="number"
+        autoFocus
       />
       <button type="submit">Next</button>
+      {n && (
+        <p>
+          {n} x {n}
+        </p>
+      )}
     </form>
   );
 };
@@ -93,6 +101,7 @@ const SetupPlayer = ({ player, handleSetupPlayer }) => {
         value={name}
         onChange={(e) => setName(e.target.value)}
         required
+        autoFocus
       />
       <button type="submit">Next</button>
     </form>
@@ -105,6 +114,33 @@ const AnnounceWinner = ({ winner }) => {
 
 const AnnounceDraw = () => {
   return <h1>It's a draw!</h1>;
+};
+
+const TurnTimer = ({ currentPlayer, setCurrentPlayer }) => {
+  const [seconds, setSeconds] = useState(maxSecondsPerTurn);
+
+  // Update the timer every second.
+  useEffect(() => {
+    const countdown = setInterval(() => {
+      setSeconds((s) => s - 1);
+    }, 1000);
+
+    return () => clearInterval(countdown);
+  }, [setSeconds]);
+
+  // Reset the timer if a player makes their move.
+  useEffect(() => {
+    setSeconds(maxSecondsPerTurn);
+  }, [currentPlayer]);
+
+  // Swap the players if the timer hits zero.
+  useEffect(() => {
+    if (seconds === 0) {
+      setCurrentPlayer((p) => swapPlayer(p));
+      setSeconds(maxSecondsPerTurn);
+    }
+  }, [seconds, setCurrentPlayer]);
+  return <p>You've got {seconds} seconds to make your move</p>;
 };
 
 const RestartButton = ({ handleRestart }) => {
@@ -150,10 +186,12 @@ function App() {
     });
   };
 
+  // Generate the board once the size is decided.
   useEffect(() => {
     setSquares(generateEmptyBoard(boardSize));
   }, [boardSize]);
 
+  // Re-evaluate the board after every move.
   useEffect(() => {
     const winner = findWinner(squares, boardSize);
     if (winner) {
@@ -209,7 +247,11 @@ function App() {
 
   return (
     <div className={styles.app}>
-      <p>{players[currentPlayer].name}'s turn</p>
+      <p>{players[currentPlayer].name}, it's your turn</p>
+      <TurnTimer
+        currentPlayer={currentPlayer}
+        setCurrentPlayer={setCurrentPlayer}
+      />
       <Board
         squares={squares}
         handleSquareClick={handleSquareClick}
