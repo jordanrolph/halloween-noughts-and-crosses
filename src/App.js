@@ -6,12 +6,14 @@ import styles from "./App.module.css";
 const minBoardSize = 3;
 const maxBoardSize = 99;
 
-const players = {
-  x: { symbol: "X", id: "x" },
-  o: { symbol: "O", id: "o" },
+const initialPlayers = {
+  x: { symbol: "X", id: "x", isSetup: false, name: "Player X" },
+  o: { symbol: "O", id: "o", isSetup: false, name: "Player O" },
 };
 const swapPlayer = (currentPlayer) =>
-  currentPlayer === players.x.id ? players.o.id : players.x.id;
+  currentPlayer === initialPlayers.x.id
+    ? initialPlayers.o.id
+    : initialPlayers.x.id;
 const isDraw = (squares) => {
   if (!squares?.length) return false;
   return squares.every((square) => square.value !== null);
@@ -24,7 +26,7 @@ const Square = ({ index, value, handleSquareClick }) => {
       onClick={() => handleSquareClick({ index })}
       disabled={!!value}
     >
-      {players[value]?.symbol}
+      {initialPlayers[value]?.symbol}
     </button>
   );
 };
@@ -54,19 +56,43 @@ const SetupBoard = ({ setBoardSize }) => {
 
   const handleSetBoardSize = (e) => {
     e.preventDefault();
-    console.log(e);
     setBoardSize(Math.max(Math.min(n, maxBoardSize), minBoardSize));
   };
   return (
     <form onSubmit={handleSetBoardSize}>
-      <label>How big do you want to go?</label>
+      <label htmlFor="boardSize">How big do you want to go?</label>
       <input
+        id="boardSize"
         value={n}
         onChange={(e) => setN(parseInt(e.target.value))}
         required
         min={minBoardSize}
         max={maxBoardSize}
         type="number"
+      />
+      <button type="submit">Next</button>
+    </form>
+  );
+};
+
+const SetupPlayer = ({ player, handleSetupPlayer }) => {
+  const [name, setName] = useState(player.name);
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleSetupPlayer({ id: player.id, name });
+      }}
+    >
+      <label htmlFor="name">
+        Player {player.symbol}, what do you want to be called?
+      </label>
+      <input
+        id="name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        required
       />
       <button type="submit">Next</button>
     </form>
@@ -94,6 +120,7 @@ const generateEmptyBoard = (boardSize) => {
 
 function App() {
   const [boardSize, setBoardSize] = useState(null);
+  const [players, setPlayers] = useState(initialPlayers);
   const [squares, setSquares] = useState([]);
   const [currentPlayer, setCurrentPlayer] = useState(players.x.id);
   const [winner, setWinner] = useState(null);
@@ -101,7 +128,8 @@ function App() {
 
   const handleRestart = () => {
     setBoardSize(null);
-    setCurrentPlayer(players.x.id);
+    setPlayers(initialPlayers);
+    setCurrentPlayer(initialPlayers.x.id);
     setSquares(generateEmptyBoard(boardSize));
     setWinner(null);
     setDraw(null);
@@ -113,6 +141,13 @@ function App() {
     const squaresCopy = [...squares];
     squaresCopy[index] = { index, value: players[currentPlayer].id };
     setSquares(squaresCopy);
+  };
+
+  const handleSetupPlayer = ({ id, name }) => {
+    setPlayers({
+      ...players,
+      [id]: { ...players[id], name, isSetup: true },
+    });
   };
 
   useEffect(() => {
@@ -134,10 +169,30 @@ function App() {
     return <SetupBoard setBoardSize={setBoardSize} />;
   }
 
+  if (!players.x.isSetup) {
+    return (
+      <SetupPlayer
+        key="x"
+        player={players.x}
+        handleSetupPlayer={handleSetupPlayer}
+      />
+    );
+  }
+
+  if (!players.o.isSetup) {
+    return (
+      <SetupPlayer
+        key="o"
+        player={players.o}
+        handleSetupPlayer={handleSetupPlayer}
+      />
+    );
+  }
+
   if (winner) {
     return (
       <div>
-        <AnnounceWinner winner={winner} />
+        <AnnounceWinner winner={players[winner].name} />
         <RestartButton handleRestart={handleRestart} />
       </div>
     );
@@ -154,6 +209,7 @@ function App() {
 
   return (
     <div className={styles.app}>
+      <p>{players[currentPlayer].name}'s turn</p>
       <Board
         squares={squares}
         handleSquareClick={handleSquareClick}
