@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import findWinner from "./utils/findWinner";
+
 import styles from "./App.module.css";
 
 const players = {
@@ -16,7 +18,7 @@ const Square = ({ index, value, handleSquareClick }) => {
       onClick={() => handleSquareClick({ index })}
       disabled={!!value}
     >
-      {value}
+      {players[value]?.symbol}
     </button>
   );
 };
@@ -34,6 +36,10 @@ const Board = ({ squares, handleSquareClick }) => {
       ))}
     </div>
   );
+};
+
+const AnnounceWinner = ({ winner }) => {
+  return <h1>{winner} won!</h1>;
 };
 
 const AnnounceDraw = () => {
@@ -65,22 +71,29 @@ function App() {
     if (!!squares[index].value) return null;
 
     const squaresCopy = [...squares];
-    squaresCopy[index] = { index, value: players[currentPlayer].symbol };
+    squaresCopy[index] = { index, value: players[currentPlayer].id };
     setSquares(squaresCopy);
   };
 
-  const findWinner = () => null;
-
   useEffect(() => {
-    const winner = findWinner();
+    const winner = findWinner(squares, 3);
     if (winner) {
       setWinner(winner);
     } else if (isDraw(squares)) {
       setDraw(true);
     } else {
-      setCurrentPlayer(swapPlayer(currentPlayer));
+      setCurrentPlayer((p) => swapPlayer(p));
     }
   }, [squares]);
+
+  if (winner) {
+    return (
+      <div>
+        <AnnounceWinner winner={winner} />
+        <RestartButton handleRestart={handleRestart} />
+      </div>
+    );
+  }
 
   if (draw) {
     return (
