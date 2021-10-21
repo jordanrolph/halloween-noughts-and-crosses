@@ -3,6 +3,9 @@ import findWinner from "./utils/findWinner";
 
 import styles from "./App.module.css";
 
+const minBoardSize = 3;
+const maxBoardSize = 99;
+
 const players = {
   x: { symbol: "X", id: "x" },
   o: { symbol: "O", id: "o" },
@@ -52,7 +55,7 @@ const SetupBoard = ({ setBoardSize }) => {
   const handleSetBoardSize = (e) => {
     e.preventDefault();
     console.log(e);
-    setBoardSize(n);
+    setBoardSize(Math.max(Math.min(n, maxBoardSize), minBoardSize));
   };
   return (
     <form onSubmit={handleSetBoardSize}>
@@ -61,8 +64,9 @@ const SetupBoard = ({ setBoardSize }) => {
         value={n}
         onChange={(e) => setN(parseInt(e.target.value))}
         required
-        min={3}
-        max={99}
+        min={minBoardSize}
+        max={maxBoardSize}
+        type="number"
       />
       <button type="submit">Next</button>
     </form>
