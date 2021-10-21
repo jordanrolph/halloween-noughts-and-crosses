@@ -13,8 +13,8 @@ const players = {
 const swapPlayer = (currentPlayer) =>
   currentPlayer === players.x.id ? players.o.id : players.x.id;
 const isDraw = (squares) => {
-  if (!squares) return false;
-  squares.every((square) => square.value !== null);
+  if (!squares?.length) return false;
+  return squares.every((square) => square.value !== null);
 };
 
 const Square = ({ index, value, handleSquareClick }) => {
