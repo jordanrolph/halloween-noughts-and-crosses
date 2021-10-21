@@ -10,9 +10,8 @@ const SetupPlayer = ({ player, handleSetupPlayer }) => {
         handleSetupPlayer({ id: player.id, name });
       }}
     >
-      <label htmlFor="name">
-        Player {player.symbol}, what do you want to be called?
-      </label>
+      <h1>{player.symbol}</h1>
+      <label htmlFor="name">What do you want to be called?</label>
       <input
         id="name"
         value={name}

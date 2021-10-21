@@ -2,7 +2,7 @@ const TurnIndicator = ({ name, symbol }) => {
   return (
     <div>
       <h1>{symbol}</h1>
-      <p>{name}, it's your turn</p>
+      <label>{name}, it's your turn</label>
     </div>
   );
 };

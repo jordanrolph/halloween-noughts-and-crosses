@@ -8,7 +8,7 @@ const Square = ({ index, value, handleSquareClick }) => {
       onClick={() => handleSquareClick({ index })}
       disabled={!!value}
     >
-      {initialPlayers[value]?.symbol}
+      <h1>{initialPlayers[value]?.symbol}</h1>
     </button>
   );
 };

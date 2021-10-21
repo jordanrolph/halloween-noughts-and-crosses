@@ -2,20 +2,21 @@ import { useState } from "react";
 import { maxBoardSize, minBoardSize } from "../constants";
 
 const SetupBoard = ({ setBoardSize }) => {
-  const [n, setN] = useState("");
+  const [n, setN] = useState(3);
 
   const handleSetBoardSize = (e) => {
     e.preventDefault();
-    setBoardSize(Math.max(Math.min(n, maxBoardSize), minBoardSize));
+    setBoardSize(
+      Math.max(Math.min(parseInt(n) || "", maxBoardSize), minBoardSize)
+    );
   };
   return (
     <form onSubmit={handleSetBoardSize}>
       <label htmlFor="boardSize">How big should the board be?</label>
-      <br />
       <input
         id="boardSize"
         value={n}
-        onChange={(e) => setN(parseInt(e.target.value) || "")}
+        onChange={(e) => setN(e.target.value)}
         required
         min={minBoardSize}
         max={maxBoardSize}
@@ -24,9 +25,9 @@ const SetupBoard = ({ setBoardSize }) => {
       />
       <button type="submit">Next</button>
       {n && (
-        <p>
+        <code>
           {n} x {n}
-        </p>
+        </code>
       )}
     </form>
   );

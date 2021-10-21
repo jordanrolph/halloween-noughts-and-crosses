@@ -6,13 +6,18 @@
   align-items: center;
   border: none;
   background-color: white;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
 }
 
 .square[disabled] {
   color: black;
+  cursor: not-allowed;
+  background-color: white;
 }
 
 .square:hover:not([disabled]) {
   cursor: pointer;
-  background-color: lightgrey;
+  /* background-color: lightgrey; */
 }
