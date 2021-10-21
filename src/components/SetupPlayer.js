@@ -5,6 +5,7 @@ const SetupPlayer = ({ player, handleSetupPlayer }) => {
 
   return (
     <form
+      data-testid="SetupPlayer"
       onSubmit={(e) => {
         e.preventDefault();
         handleSetupPlayer({ id: player.id, name });

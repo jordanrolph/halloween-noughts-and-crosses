@@ -4,6 +4,7 @@ import styles from "./Square.module.css";
 const Square = ({ index, value, handleSquareClick }) => {
   return (
     <button
+      data-testid={`Square-${index}`}
       className={styles.square}
       onClick={() => handleSquareClick({ index })}
       disabled={!!value}

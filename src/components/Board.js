@@ -4,7 +4,7 @@ import styles from "./Board.module.css";
 
 const Board = ({ squares, handleSquareClick, boardSize }) => {
   return (
-    <div className={styles.container}>
+    <div data-testid="Board" className={styles.container}>
       <div
         className={styles.board}
         style={{

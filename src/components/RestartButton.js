@@ -1,6 +1,6 @@
 const RestartButton = ({ handleRestart }) => {
   return (
-    <div>
+    <div data-testid="RestartButton">
       <button onClick={handleRestart}>Restart Game</button>
     </div>
   );

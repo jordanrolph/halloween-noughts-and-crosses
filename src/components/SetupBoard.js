@@ -11,7 +11,7 @@ const SetupBoard = ({ setBoardSize }) => {
     );
   };
   return (
-    <form onSubmit={handleSetBoardSize}>
+    <form data-testid="SetupBoard" onSubmit={handleSetBoardSize}>
       <label htmlFor="boardSize">How big should the board be?</label>
       <input
         id="boardSize"

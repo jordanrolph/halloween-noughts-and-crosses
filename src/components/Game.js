@@ -48,7 +48,7 @@ export default function Game({
     return (
       <>
         <AnnounceWinner
-          winner={players[winner].name}
+          name={players[winner].name}
           symbol={players[winner].symbol}
         />
         <RestartButton handleRestart={handleRestart} />

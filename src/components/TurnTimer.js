@@ -26,7 +26,11 @@ const TurnTimer = ({ currentPlayer, setCurrentPlayer }) => {
       setSeconds(maxSecondsPerTurn);
     }
   }, [seconds, setCurrentPlayer]);
-  return <code>You've got {seconds} seconds left to make your move</code>;
+  return (
+    <code data-testid="TurnTimer">
+      You've got {seconds} seconds left to make your move
+    </code>
+  );
 };
 
 export default TurnTimer;
