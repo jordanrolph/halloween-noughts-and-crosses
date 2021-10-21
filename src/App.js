@@ -9,7 +9,10 @@ const players = {
 };
 const swapPlayer = (currentPlayer) =>
   currentPlayer === players.x.id ? players.o.id : players.x.id;
-const isDraw = (squares) => squares.every((square) => square.value !== null);
+const isDraw = (squares) => {
+  if (!squares) return false;
+  squares.every((square) => square.value !== null);
+};
 
 const Square = ({ index, value, handleSquareClick }) => {
   return (
@@ -23,9 +26,14 @@ const Square = ({ index, value, handleSquareClick }) => {
   );
 };
 
-const Board = ({ squares, handleSquareClick }) => {
+const Board = ({ squares, handleSquareClick, boardSize }) => {
   return (
-    <div className={styles.board}>
+    <div
+      className={styles.board}
+      style={{
+        gridTemplate: `repeat(${boardSize}, 1fr) / repeat(${boardSize}, 1fr)`,
+      }}
+    >
       {squares.map((square) => (
         <Square
           key={square.index}
@@ -35,6 +43,29 @@ const Board = ({ squares, handleSquareClick }) => {
         />
       ))}
     </div>
+  );
+};
+
+const SetupBoard = ({ setBoardSize }) => {
+  const [n, setN] = useState("");
+
+  const handleSetBoardSize = (e) => {
+    e.preventDefault();
+    console.log(e);
+    setBoardSize(n);
+  };
+  return (
+    <form onSubmit={handleSetBoardSize}>
+      <label>How big do you want to go?</label>
+      <input
+        value={n}
+        onChange={(e) => setN(parseInt(e.target.value))}
+        required
+        min={3}
+        max={99}
+      />
+      <button type="submit">Next</button>
+    </form>
   );
 };
 
@@ -50,19 +81,24 @@ const RestartButton = ({ handleRestart }) => {
   return <button onClick={handleRestart}>Restart Game</button>;
 };
 
-const generateEmptyBoard = () => {
-  return [...Array(3 * 3)].map((k, i) => ({ index: i, value: null }));
+const generateEmptyBoard = (boardSize) => {
+  return [...Array(boardSize * boardSize)].map((k, i) => ({
+    index: i,
+    value: null,
+  }));
 };
 
 function App() {
-  const [squares, setSquares] = useState(generateEmptyBoard());
+  const [boardSize, setBoardSize] = useState(null);
+  const [squares, setSquares] = useState([]);
   const [currentPlayer, setCurrentPlayer] = useState(players.x.id);
   const [winner, setWinner] = useState(null);
   const [draw, setDraw] = useState(false);
 
   const handleRestart = () => {
+    setBoardSize(null);
     setCurrentPlayer(players.x.id);
-    setSquares(generateEmptyBoard());
+    setSquares(generateEmptyBoard(boardSize));
     setWinner(null);
     setDraw(null);
   };
@@ -76,7 +112,11 @@ function App() {
   };
 
   useEffect(() => {
-    const winner = findWinner(squares, 3);
+    setSquares(generateEmptyBoard(boardSize));
+  }, [boardSize]);
+
+  useEffect(() => {
+    const winner = findWinner(squares, boardSize);
     if (winner) {
       setWinner(winner);
     } else if (isDraw(squares)) {
@@ -84,7 +124,11 @@ function App() {
     } else {
       setCurrentPlayer((p) => swapPlayer(p));
     }
-  }, [squares]);
+  }, [squares, boardSize]);
+
+  if (!boardSize) {
+    return <SetupBoard setBoardSize={setBoardSize} />;
+  }
 
   if (winner) {
     return (
@@ -106,7 +150,11 @@ function App() {
 
   return (
     <div className={styles.app}>
-      <Board squares={squares} handleSquareClick={handleSquareClick} />
+      <Board
+        squares={squares}
+        handleSquareClick={handleSquareClick}
+        boardSize={boardSize}
+      />
     </div>
   );
 }

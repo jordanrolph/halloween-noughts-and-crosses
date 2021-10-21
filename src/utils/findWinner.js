@@ -1,5 +1,6 @@
 // looks for all the possible wins and stops if it finds one.
 export default function findWinner(squares, n) {
+  if (!squares?.length || !n) return null;
   let winner = null;
 
   winner = findHorizontalWins(squares, n);
